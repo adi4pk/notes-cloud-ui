@@ -3,6 +3,8 @@ import { login } from "../services/notesService";
 import type { UserLogin } from "../models/User";
 import type { ApiRequestError } from "../services/notesService";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserAuthenticationContextType";
+import { useToken } from "../contexts/UserAuthenticationContextType";
 
 function Login() {
   useEffect(() => {
@@ -13,8 +15,13 @@ function Login() {
   const navigate = useNavigate();
 
 
+  const { handleContextLogin, setAccesToken } = useToken();
+
+
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+
+  const [error, setError] = useState<string | null> (null);
 
   const handleLogin = async () => {
     // try {
@@ -28,20 +35,22 @@ function Login() {
     //     alert(d.message);
     // }
 
-    let textResponse = "";
-
     let goToNotes = () =>{
     navigate("/main");
   }
 
+    setError(null);
+    
     try{
-    const data = await login({email: user, password: pass});    //login(user: userLogin)  |   destructure the User.ts interface
-      if(data){
-        goToNotes();
-      }
+      await handleContextLogin(user, pass);    //login(user: userLogin)  |   destructure the User.ts interface
+      
+      goToNotes();
+      
     } catch (err){
       console.log(err);
-      goToNotes();
+      // goToNotes();
+      const e = err as ApiRequestError;     //need to tell TypeScript to treat e as an ERROR, so message and status properties become available.
+      setError(e.message ?? "login failed");    //updates UI state with either backend message or fallback.
     }
   };
 

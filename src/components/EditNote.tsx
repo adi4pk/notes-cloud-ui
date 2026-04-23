@@ -17,6 +17,8 @@ const [noteCategory, setNoteCategory] = useState("");
 const [isFavorite, setIsFavorite] = useState(Boolean);
 const [noteDate, setNoteDate] = useState("");
 
+const [isEmptyTitle, setIsEmptyTitle] = useState<Boolean>(false);
+
 useEffect(() => {
     // console.log(currentNote);
     fetchNote();
@@ -40,6 +42,7 @@ async function fetchNote(){
 
 async function editNote(){
 
+  
     if(currentNote !==null){
         let noteObj={
         title: noteTitle,
@@ -47,12 +50,19 @@ async function editNote(){
         categoryId: noteCategory,
         isFavorite: isFavorite,
         date: noteDate,
+        // date: currentNote?.date,
+    } 
+    // console.log(noteObj);
+      console.log(noteTitle)
+    if(noteTitle === ""){
+      console.log(noteTitle)
+      // setIsEmptyTitle(true);
+      // return;
     }
-    console.log(noteObj);
-    
 
-    await updateNote(currentNote?.id+"", noteObj);
-    goToHome()
+    // await updateNote(currentNote?.id+"", noteObj as CreateNoteRequest );
+    // console.log(noteObj);
+    // goToHome()
     }
 
    
@@ -70,24 +80,11 @@ async function editNote(){
 return(
     <>
     <div className="add-note-form">
-                <h2
-                  style={{
-                    marginBottom: 25,
-                    color: "#2c3e50",
-                    fontSize: "1.8em",
-                  }}
-                >
-                  Creează Notiță Nouă
+                <h2 className="edit-note-title">
+                  Editeaza Nota
                 </h2>
-                <form className="form-container"
-                style={{display: "flex",
-                  flexDirection: "column",
-                  alignItems: "start",
-                }}>
-                  <div className="form-group"
-                  style={{display: "flex",
-                    flexDirection: "column",
-                  }}>
+                <form className="form-container">
+                  <div className="form-group">
                     <label htmlFor="note-title"
                     style={{textAlign:"start",}}>Titlu</label>
                     <input
@@ -95,19 +92,12 @@ return(
                       id="note-title"
                       placeholder="Introdu titlul notei..."
                       defaultValue={currentNote?.title}
-                      style={{
-                        border: "2px solid salmon",
-                      height: "30px",
-                      borderRadius: "5px",
-                      }}
                     //   value={currentNote?.title}
-                      onChange={(event) => setNoteTitle(event.target.value)}
+                      onInput={(event) => setNoteTitle((event.target as HTMLInputElement).value)}
                     />
+                    <p className={isEmptyTitle? 'error' : 'hide'}>Title cannot be empty.</p>
                   </div>
-                  <div className="form-group"
-                  style={{display: "flex",
-                    flexDirection: "column",
-                  }}>
+                  <div className="form-group">
                     <label htmlFor="note-content"
                     style={{textAlign:"start",
                     }}>
@@ -116,13 +106,7 @@ return(
                       id="note-content"
                       placeholder="Scrie notița aici..."
                       defaultValue={currentNote?.content}
-                      style={{
-                        border: "2px solid salmon",
-                      borderRadius: "5px",
-                      width: "400px",
-                      height: "120px",
-                      }}
-                    //   value={currentNote?.content} ----
+                    //   value={currentNote?.content}
                       onChange={(event) => setNoteContent(event.target.value)}/>
                   </div>
                   <div className="form-buttons">

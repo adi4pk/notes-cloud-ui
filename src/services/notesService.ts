@@ -1,9 +1,10 @@
-import { use } from "react";
+import { use, useContext } from "react";
 import type { Token } from "../models/Token";
 import type { UserLogin } from "../models/User";
 import type { CreateNoteRequest } from "../models/CreateNoteRequest";
 import type { CreateNoteResponse } from "../models/CreateNoteResponse";
 import type { NoteItem } from "../models/NoteItem";
+
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -14,10 +15,14 @@ export type ApiRequestError = {
   message: string;
 };
 
+//CONTEXT FUNCTIONS
 
-function setAccesToken(token: string){
-  localStorage.setItem("access_token", token);
-}
+
+
+
+// function setAccesToken(token: string){
+//   localStorage.setItem("access_token", token);
+// }
 
 export async function login(user: UserLogin) {
   const response = await fetch(`${API_BASE_URL}api/v1/auth/login`, {      //url + options{...}
@@ -41,11 +46,11 @@ export async function login(user: UserLogin) {
   // return await response.json(); //
 
   let data = await response.json();
-  setAccesToken(data.token);
+  // setAccesToken(data.token);   -- Best practice: SET TOKEN in CONTEXT, NOT Api service.ts file
 
   console.log(data.token);
   
-  return data;
+  return data;    //=> this token data (string) will be grabbed by Context
 }
 
 
@@ -80,7 +85,7 @@ let token = localStorage.getItem("access_token");
 export async function createNote(note: CreateNoteRequest): Promise<CreateNoteResponse>{
 
   let token = localStorage.getItem("access_token");
-  console.log(token);
+  // console.log(token);
   const response = await fetch(`${API_BASE_URL}api/v1/notes`, {
   method: "POST",
   headers: {"Content-Type" : "application/json; charset=utf-8",
@@ -133,7 +138,7 @@ export async function updateNote(id: string, note: CreateNoteRequest): Promise<C
   let token = localStorage.getItem("access_token");
 
 
-  console.log(token)
+  // console.log(token);
 
   const response = await fetch(`${API_BASE_URL}api/v1/notes/${id}`,{
     method: "PUT",

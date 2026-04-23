@@ -132,3 +132,57 @@ code {
 .note-date{
   min-width: 205px;
 }
+
+
+
+/* EDIT Page */
+#note-title{
+  border: 2px solid salmon;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.edit-note-title{
+  margin-bottom: 25;
+  color: "#2c3e50";
+  font-size: "1.8em";
+}
+
+.form-container{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.form-group{
+  display: flex;
+  flex-direction: column;
+}
+
+#note-content {
+  border: "2px solid salmon";
+  border-radius: 5px;
+  width: 400px;
+  height: 120px;
+}
+
+
+/* ADD NOTE Page */
+
+.title-error-div{
+  display: flex;
+  color: salmon;
+}
+
+.content-error-div{
+  display: flex;
+  color: salmon;
+}
+
+.error{
+  margin-left: 15px;
+}
+
+.hide{
+  display: none;
+}
