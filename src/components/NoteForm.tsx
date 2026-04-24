@@ -71,7 +71,7 @@ function NoteForm(){
                       value={title}
                       onChange={event => setTitle(event.target.value)}
                     />
-                    <p className={isEmptyTitle?'error':'hide'}>Title cannot be empty</p>
+                    <p className={isEmptyTitle?'add-note-error':'hide'}>Title cannot be empty</p>
                     </div>
                   </div>
                   <div className="form-group">
@@ -87,7 +87,7 @@ function NoteForm(){
                       value={content}
                       onChange={event => setContent(event.target.value)}
                     />
-                    <p className={isEmptyContent? 'error': 'hide'}>Content cannot be empty</p>
+                    <p className={isEmptyContent? 'add-note-error': 'hide'}>Content cannot be empty</p>
                     </div>
                   </div>
                   <div className="form-buttons">

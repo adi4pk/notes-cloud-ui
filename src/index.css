@@ -111,6 +111,26 @@ code {
 }
 
 
+.header-section{
+  display: flex;
+  justify-content: center;
+}
+
+.title-wrapper{
+  margin-left: 30%;
+}
+
+.side-buttons{
+  margin-left: auto;
+}
+.logout-btn{
+  margin-top: 30px;
+  margin-right: 30px;
+  width: 70px;
+  height: 35px;
+  font-weight: bold;
+}
+
 .table-container > tr > td{
   border: 2px solid salmon;
 }
@@ -179,10 +199,18 @@ code {
   color: salmon;
 }
 
-.error{
+.add-note-error{
   margin-left: 15px;
 }
 
 .hide{
   display: none;
+}
+
+
+/* ////// LOGIN PAGE ////// */
+
+.login-error-message{
+  margin-top: 15px;
+  color: salmon;
 }

@@ -1,4 +1,3 @@
-import { use, useContext } from "react";
 import type { Token } from "../models/Token";
 import type { UserLogin } from "../models/User";
 import type { CreateNoteRequest } from "../models/CreateNoteRequest";
@@ -15,16 +14,19 @@ export type ApiRequestError = {
   message: string;
 };
 
+//NO HOOKS IN SERVICE
+
 //CONTEXT FUNCTIONS
 
+// const [userToken, setUserToken] = useState<string | null> (null); faulty
 
 
+function setAccesToken(token: string){
+  localStorage.setItem("access_token", token);
+  // setUserToken("access_token");
+}
 
-// function setAccesToken(token: string){
-//   localStorage.setItem("access_token", token);
-// }
-
-export async function login(user: UserLogin) {
+export async function login<T>(user: UserLogin): Promise<T> {
   const response = await fetch(`${API_BASE_URL}api/v1/auth/login`, {      //url + options{...}
     method: "POST",
     headers: {
@@ -46,11 +48,12 @@ export async function login(user: UserLogin) {
   // return await response.json(); //
 
   let data = await response.json();
-  // setAccesToken(data.token);   -- Best practice: SET TOKEN in CONTEXT, NOT Api service.ts file
+  setAccesToken(data.token);   
+  // -- Best practice: SET TOKEN in CONTEXT, NOT Api service.ts file
 
   console.log(data.token);
   
-  return data;    //=> this token data (string) will be grabbed by Context
+  return data as T;    //=> this token data (string) will be grabbed by Context
 }
 
 
@@ -106,7 +109,7 @@ export async function createNote(note: CreateNoteRequest): Promise<CreateNoteRes
     throw error;
   }
 
-  return await response.json();
+  return await response.json() as Promise<CreateNoteResponse>;
 }
 
 export async function getNoteById(id: string): Promise<NoteItem>{

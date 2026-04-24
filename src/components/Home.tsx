@@ -5,12 +5,14 @@ import { getNotes } from "../services/notesService";
 import NoteForm from "./NoteForm";
 import { useNavigate } from "react-router-dom";
 import { getNoteById } from "../services/notesService";
+import { useUser } from "../contexts/UserAuthenticationContextType";
 
 function Home(){
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
 
 
+  const {userLogged, setUserLogged} = useUser();
 
   useEffect(() =>{
 
@@ -24,6 +26,19 @@ function Home(){
     navigate("/addNote");
   }
 
+  let goToLogin = () => {
+    navigate("/");
+  }
+
+  function logOut (){
+    if (userLogged){
+      setUserLogged(null);
+      console.log("user disconnected");
+
+      localStorage.removeItem("access_token");
+      goToLogin();
+    }
+  }
   
 
   async function loadNotes(){
@@ -42,9 +57,16 @@ function Home(){
 
 return(
         <div className="container">
-        <header>
-          <h1>📝 Notițele Mele</h1>
-          <p>Organizează-ți ideile cu stil</p>
+        <header className="header-section">
+          <div className="title-wrapper">
+            <h1>📝 Notițele Mele</h1>
+            <p>Organizează-ți ideile cu stil</p>
+          </div>
+          
+          <div className="side-buttons">
+            <button className="logout-btn"
+            onClick={() => logOut()}>Log out</button>
+          </div>
         </header>
         
        <div className="all-notes-content tab-content"
