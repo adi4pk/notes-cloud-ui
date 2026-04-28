@@ -1,80 +1,83 @@
 import type { NoteItem } from "../models/NoteItem";
-import { use, useEffect, useState } from "react";
-import { createNote } from "../services/notesService";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { CreateNoteRequest } from "../models/CreateNoteRequest";
-import { getNoteById } from "../services/notesService";
-import { updateNote } from "../services/notesService";
+import { getNoteById, updateNote, type ApiRequestError } from "../services/notesService";
 
 function EditNote(){
 
-let navigate = useNavigate();
+const navigate = useNavigate();
 const {id} = useParams();
-const [currentNote, setCurrentNote] = useState<NoteItem> ();
+const [currentNote, setCurrentNote] = useState<NoteItem | null>(null);
 const [noteTitle, setNoteTitle] = useState("");
 const [noteContent, setNoteContent] = useState("");
 const [noteCategory, setNoteCategory] = useState("");
-const [isFavorite, setIsFavorite] = useState(Boolean);
+const [isFavorite, setIsFavorite] = useState(false);
 const [noteDate, setNoteDate] = useState("");
+const [isEmptyTitle, setIsEmptyTitle] = useState(false);
+const [isEmptyContent, setIsEmptyContent] = useState(false);
+const [isEmptyCategory, setIsEmptyCategory] = useState(false);
+const [error, setError] = useState<string | null>(null);
 
-const [isEmptyTitle, setIsEmptyTitle] = useState<Boolean>(false);
-
-useEffect(() => {
-    // console.log(currentNote);
-    fetchNote();
-    
-}, [])
-
-let goToHome = () =>{
+const goToHome = () =>{
     navigate('/main');
 }
 
-async function fetchNote(){
-    
-    let thisNote = await getNoteById(id??"");
-    setCurrentNote(thisNote);
-    setNoteTitle(thisNote.title);
-    setNoteContent(thisNote.content);
-    setNoteCategory(thisNote.categoryId);
-    setIsFavorite(thisNote.isFavorite);
-    setNoteDate(thisNote.date);
-}
+useEffect(() => {
+    const fetchNote = async () => {
+      if (!id) {
+        setError("Nota nu a putut fi identificată.");
+        return;
+      }
 
-async function editNote(){
+      try {
+        const thisNote = await getNoteById(id);
+        setCurrentNote(thisNote);
+        setNoteTitle(thisNote.title);
+        setNoteContent(thisNote.content);
+        setNoteCategory(thisNote.categoryId);
+        setIsFavorite(thisNote.isFavorite);
+        setNoteDate(thisNote.date);
+      } catch (err) {
+        const apiError = err as ApiRequestError;
+        setError(apiError.message ?? "Nu am putut încărca notița.");
+      }
+    };
 
-  
-    if(currentNote !==null){
-        let noteObj={
-        title: noteTitle,
-        content: noteContent,
-        categoryId: noteCategory,
-        isFavorite: isFavorite,
-        date: noteDate,
-        // date: currentNote?.date,
-    } 
-    // console.log(noteObj);
-      console.log(noteTitle)
-    if(noteTitle === ""){
-      console.log(noteTitle)
-      // setIsEmptyTitle(true);
-      // return;
+    void fetchNote();
+}, [id]);
+
+async function editNote(event: FormEvent<HTMLFormElement>){
+    event.preventDefault();
+
+    const nextIsEmptyTitle = noteTitle.trim() === "";
+    const nextIsEmptyContent = noteContent.trim() === "";
+    const nextIsEmptyCategory = noteCategory.trim() === "";
+
+    setIsEmptyTitle(nextIsEmptyTitle);
+    setIsEmptyContent(nextIsEmptyContent);
+    setIsEmptyCategory(nextIsEmptyCategory);
+    setError(null);
+
+    if (nextIsEmptyTitle || nextIsEmptyContent || nextIsEmptyCategory || !currentNote) {
+      return;
     }
 
-    // await updateNote(currentNote?.id+"", noteObj as CreateNoteRequest );
-    // console.log(noteObj);
-    // goToHome()
+    const noteObj: CreateNoteRequest = {
+      title: noteTitle.trim(),
+      content: noteContent.trim(),
+      categoryId: noteCategory.trim(),
+      isFavorite,
+      date: noteDate || new Date().toISOString(),
+    };
+
+    try {
+      await updateNote(currentNote.id, noteObj);
+      goToHome();
+    } catch (err) {
+      const apiError = err as ApiRequestError;
+      setError(apiError.message ?? "Nu am putut actualiza notița.");
     }
-
-   
-    // goToHome();
-
-    // setNoteTitle(noteObj.title);
-    // setNoteContent(noteObj.content);
-    // setNoteCategory(noteObj.categoryId);
-    // setIsFavorite(noteObj.isFavorite);
-    // setNoteDate(noteObj.date);
-
-    
 }
 
 return(
@@ -83,7 +86,7 @@ return(
                 <h2 className="edit-note-title">
                   Editeaza Nota
                 </h2>
-                <form className="form-container">
+                <form className="form-container" onSubmit={editNote}>
                   <div className="form-group">
                     <label htmlFor="note-title"
                     style={{textAlign:"start",}}>Titlu</label>
@@ -91,11 +94,22 @@ return(
                       type="text"
                       id="note-title"
                       placeholder="Introdu titlul notei..."
-                      defaultValue={currentNote?.title}
-                    //   value={currentNote?.title}
-                      onInput={(event) => setNoteTitle((event.target as HTMLInputElement).value)}
+                      value={noteTitle}
+                      onChange={(event) => setNoteTitle(event.target.value)}
                     />
-                    <p className={isEmptyTitle? 'error' : 'hide'}>Title cannot be empty.</p>
+                    <p className={isEmptyTitle ? 'add-note-error' : 'hide'}>Title cannot be empty.</p>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="note-category"
+                    style={{textAlign:"start",}}>Category ID</label>
+                    <input
+                      type="text"
+                      id="note-category"
+                      placeholder="Introdu category ID..."
+                      value={noteCategory}
+                      onChange={(event) => setNoteCategory(event.target.value)}
+                    />
+                    <p className={isEmptyCategory ? 'add-note-error' : 'hide'}>Category ID cannot be empty.</p>
                   </div>
                   <div className="form-group">
                     <label htmlFor="note-content"
@@ -105,25 +119,34 @@ return(
                     <textarea
                       id="note-content"
                       placeholder="Scrie notița aici..."
-                      defaultValue={currentNote?.content}
-                    //   value={currentNote?.content}
+                      value={noteContent}
                       onChange={(event) => setNoteContent(event.target.value)}/>
+                    <p className={isEmptyContent ? 'add-note-error' : 'hide'}>Content cannot be empty.</p>
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="note-favorite" style={{textAlign:"start"}}>Favorite</label>
+                    <input
+                      type="checkbox"
+                      id="note-favorite"
+                      checked={isFavorite}
+                      onChange={(event) => setIsFavorite(event.target.checked)}
+                    />
+                  </div>
+                  <p className={error ? 'login-error-message' : 'hide'}>{error ?? ""}</p>
                   <div className="form-buttons">
-                    <label
-                      htmlFor="add-note-toggle"
+                    <button
+                      type="submit"
                       className="btn btn-primary"
-                      onClick={() => editNote()}
                     >
                       💾 Salvează
-                    </label>
-                    <label
-                      htmlFor="add-note-toggle"
+                    </button>
+                    <button
+                      type="button"
                       className="btn btn-secondary"
-                      onClick={() => goToHome()}
+                      onClick={goToHome}
                     >
                       ❌ Anulează
-                    </label>
+                    </button>
                   </div>
                 </form>
               </div></>

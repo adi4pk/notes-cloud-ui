@@ -2,49 +2,40 @@ import { useEffect, useState } from "react";
 import type { NoteItem } from "../models/NoteItem";
 import Note from "./Note";
 import { getNotes } from "../services/notesService";
-import NoteForm from "./NoteForm";
 import { useNavigate } from "react-router-dom";
-import { getNoteById } from "../services/notesService";
-import { useUser } from "../contexts/UserAuthenticationContextType";
+import { useAuth } from "../contexts/useAuth";
 
 function Home(){
-
   const [notes, setNotes] = useState<NoteItem[]>([]);
-
-
-  const {userLogged, setUserLogged} = useUser();
-
-  useEffect(() =>{
-
-    loadNotes();
-  }, []);
-
+  const { signOut } = useAuth();
 
   const navigate = useNavigate();
 
-  let goToAddNote = () => {
+  const goToAddNote = () => {
     navigate("/addNote");
   }
 
-  let goToLogin = () => {
+  const goToLogin = () => {
     navigate("/");
   }
 
-  function logOut (){
-    if (userLogged){
-      setUserLogged(null);
-      console.log("user disconnected");
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const data = await getNotes();
+      setNotes(data.notes);
+    };
 
-      localStorage.removeItem("access_token");
-      goToLogin();
-    }
-  }
-  
+    void fetchNotes();
+  }, []);
 
-  async function loadNotes(){
-    let data = await getNotes();
+  async function loadNotes() {
+    const data = await getNotes();
     setNotes(data.notes);
-    console.log(data.notes);
+  }
+
+  function logOut() {
+    signOut();
+    goToLogin();
   }
 
   // const [currentNote, setCurrentNote]=useState<NoteItem | null>(null);
@@ -73,18 +64,17 @@ return(
         style={{display: "flex"}}>
             {/* Add Note Section */}
             <div className="add-note-wrapper">
-              <label htmlFor="add-note-toggle" className="add-note-btn"
-              >
+              <button type="button" className="add-note-btn" onClick={goToAddNote}>
                 <span
                 style={{
           border: "2px solid salmon",
           height: "30px",
           borderRadius: "5px",
         }}
-        onClick={() => goToAddNote()}>
+        >
           ➕ </span>
           Adaugă Notiță Nouă
-              </label>
+              </button>
             </div>
             </div>
             
@@ -125,4 +115,3 @@ return(
 
 
 export default Home;
-

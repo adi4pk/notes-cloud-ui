@@ -1,49 +1,56 @@
-import type { NoteItem } from "../models/NoteItem";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { createNote } from "../services/notesService";
 import { useNavigate } from "react-router-dom";
 import type { CreateNoteRequest } from "../models/CreateNoteRequest";
+import type { ApiRequestError } from "../services/notesService";
 
 function NoteForm(){
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [isEmptyTitle, setIsEmptyTitle] = useState<Boolean>(false);
-    const [isEmptyContent, setIsEmptyContent] = useState<Boolean>(false);
+    const [categoryId, setCategoryId] = useState("");
+    const [isEmptyTitle, setIsEmptyTitle] = useState(false);
+    const [isEmptyContent, setIsEmptyContent] = useState(false);
+    const [isEmptyCategory, setIsEmptyCategory] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
-    let goToHome = () => {
+    const goToHome = () => {
       navigate('/main');
     }
 
-    const handleAddNote = async () =>{
+    const handleAddNote = async (event: FormEvent<HTMLFormElement>) =>{
+        event.preventDefault();
 
-        let noteObj: CreateNoteRequest = {
-            title: title,
-            content: content,
-            categoryId: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+        const nextIsEmptyTitle = title.trim() === "";
+        const nextIsEmptyContent = content.trim() === "";
+        const nextIsEmptyCategory = categoryId.trim() === "";
+
+        setIsEmptyTitle(nextIsEmptyTitle);
+        setIsEmptyContent(nextIsEmptyContent);
+        setIsEmptyCategory(nextIsEmptyCategory);
+        setError(null);
+
+        if (nextIsEmptyTitle || nextIsEmptyContent || nextIsEmptyCategory) {
+          return;
+        }
+
+        const noteObj: CreateNoteRequest = {
+            title: title.trim(),
+            content: content.trim(),
+            categoryId: categoryId.trim(),
             isFavorite: false,
-            // date: Date.now().toString()
-            date: "2026-04-07T19:12:10.774Z"
+            date: new Date().toISOString()
         }
 
-        if(title === ""){
-          setIsEmptyTitle(true);
-          setIsEmptyContent(false);
-          return;
-        } else if(content === ""){
-          setIsEmptyContent(true);
-          setIsEmptyTitle(false);
-          return;
+        try {
+          await createNote(noteObj);
+          goToHome();
+        } catch (err) {
+          const apiError = err as ApiRequestError;
+          setError(apiError.message ?? "Nu am putut crea notița.");
         }
-
-        let data = await createNote(noteObj);
-        console.log("test");
-        setIsEmptyTitle(false);
-        setIsEmptyContent(false);
-        goToHome();
-        console.log(data);
     }
 
     return(
@@ -58,7 +65,7 @@ function NoteForm(){
                 >
                   Creează Notiță Nouă
                 </h2>
-                <form className="form-container">
+                <form className="form-container" onSubmit={handleAddNote}>
                   <div className="form-group">
                     <label htmlFor="note-title"
                     style={{textAlign:"start",}}>Titlu</label>
@@ -72,6 +79,19 @@ function NoteForm(){
                       onChange={event => setTitle(event.target.value)}
                     />
                     <p className={isEmptyTitle?'add-note-error':'hide'}>Title cannot be empty</p>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="note-category" style={{textAlign:"start"}}>Category ID</label>
+                    <div className="content-error-div">
+                    <input
+                      type="text"
+                      id="note-category"
+                      placeholder="Introdu category ID..."
+                      value={categoryId}
+                      onChange={event => setCategoryId(event.target.value)}
+                    />
+                    <p className={isEmptyCategory ? 'add-note-error' : 'hide'}>Category ID cannot be empty</p>
                     </div>
                   </div>
                   <div className="form-group">
@@ -90,24 +110,21 @@ function NoteForm(){
                     <p className={isEmptyContent? 'add-note-error': 'hide'}>Content cannot be empty</p>
                     </div>
                   </div>
+                  <p className={error ? 'login-error-message' : 'hide'}>{error ?? ""}</p>
                   <div className="form-buttons">
-                    <label
-                      htmlFor="add-note-toggle"
+                    <button
+                      type="submit"
                       className="btn btn-primary"
-                      onClick={() => {
-                        handleAddNote();
-                        
-                      }}
                     >
                       💾 Salvează
-                    </label>
-                    <label
-                      htmlFor="add-note-toggle"
+                    </button>
+                    <button
+                      type="button"
                       className="btn btn-secondary"
-                      onClick={() => goToHome()}
+                      onClick={goToHome}
                     >
                       ❌ Anulează
-                    </label>
+                    </button>
                   </div>
                 </form>
               </div>

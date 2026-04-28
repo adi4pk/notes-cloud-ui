@@ -1,24 +1,13 @@
-import { useEffect, useState } from "react";
-import { login } from "../services/notesService";
-import type { UserLogin } from "../models/User";
+import { useState } from "react";
 import type { ApiRequestError } from "../services/notesService";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/UserAuthenticationContextType";
-import { useUser } from "../contexts/UserAuthenticationContextType";
-import type { LoggedUser } from "../models/LoggedUser";
+import { useAuth } from "../contexts/useAuth";
 
 function Login() {
-  useEffect(() => {
-   
-      // handleLogin();     -- use in useEffect for auto-Login??
-  }, []);
-
   const navigate = useNavigate();
-
-
-  const { setUserLogged} = useUser();
+  const { signIn } = useAuth();
     
-  let goToNotes = () =>{
+  const goToNotes = () =>{
     navigate("/main");
   }
 
@@ -31,30 +20,13 @@ function Login() {
     try{ 
 
       setError(null)
-      const data = await login<LoggedUser>({email: email, password: password})  //login(user: userLogin)  |   destructure the User.ts interface
-      console.log(data);
-      
-
-      let userObj: LoggedUser={
-        email: email,
-        password: password,
-        token: data.token,
-        expiresAt: data.expiresAt,
-        permissions: data.permissions,
-      }
-
-      setUserLogged(userObj);
-
+      await signIn({email: email, password: password});
       
       goToNotes();
 
     } catch(err){
-      let e = err as ApiRequestError;   //need to tell TypeScript to treat e as an ERROR, so message and status properties become available.
-      // e.message = "FAILED";
-      setError(e.message ?? "login failed");    //updates UI state with either backend message or fallback.
-      // alert(e.message);
-
-      console.log(e.message);
+      const e = err as ApiRequestError;
+      setError(e.message ?? "login failed");
     }
   };
 

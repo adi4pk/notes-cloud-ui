@@ -1,29 +1,44 @@
-import { useState } from 'react'
+import type { ReactElement } from "react"
 import Home from './components/Home'
 import Login from './components/Login'
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import NoteForm from './components/NoteForm'
 import EditNote from './components/EditNote'
-import { UserContextProvider } from './contexts/UserAuthenticationContextType'
+import { AuthProvider } from './contexts/AuthProvider'
+import { useAuth } from './contexts/useAuth'
+
+function ProtectedRoute({ children }: { children: ReactElement }) {
+  const { authSession } = useAuth()
+
+  if (!authSession?.token) {
+    return <Navigate to="/" replace />
+  }
+
+  return children
+}
+
+function PublicRoute({ children }: { children: ReactElement }) {
+  const { authSession } = useAuth()
+
+  if (authSession?.token) {
+    return <Navigate to="/main" replace />
+  }
+
+  return children
+}
 
 function App() {
   return (
-    <>
-      <UserContextProvider>
-        
+    <AuthProvider>
         <BrowserRouter>
-
           <Routes>
-            <Route path="/" element={<Login />}></Route> //MUST name this path '/' -- this is the default path found by REACT Router
-            <Route path="/main" element={<Home />}></Route>
-            <Route path="/addNote" element={<NoteForm />}></Route>
-            <Route path="/editNote/:id" element={<EditNote />}></Route>
+            <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/main" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/addNote" element={<ProtectedRoute><NoteForm /></ProtectedRoute>} />
+            <Route path="/editNote/:id" element={<ProtectedRoute><EditNote /></ProtectedRoute>} />
           </Routes>
-
         </BrowserRouter>
-
-      </UserContextProvider>
-    </>
+    </AuthProvider>
   );
 }
 

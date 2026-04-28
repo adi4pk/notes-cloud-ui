@@ -1,6 +1,5 @@
-import { useState } from "react";
 import type { NoteItem } from "../models/NoteItem";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { removeNote } from "../services/notesService";
 
 type NoteProps={
@@ -11,15 +10,8 @@ type NoteProps={
 
 
 function Note({note, reload}:NoteProps){
-
-  let navigate = useNavigate();
-
-  let goToEditNote = () => {
-    navigate("/editNote")
-  }
-
   async function deleteNote(id: string){
-    let data = await removeNote(id);
+    await removeNote(id);
     reload();
   }
   

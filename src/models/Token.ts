@@ -1,4 +1,4 @@
 export interface Token {
-    email: string;
-    password: string;
+    token: string;
+    expiresAt: string;
 }
