@@ -1,51 +1,64 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { login } from "../services/notesService";
 import type { UserLogin } from "../models/User";
 import type { ApiRequestError } from "../services/notesService";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserAuthenticationContextType";
+import { useUser } from "../contexts/UserAuthenticationContextType";
+import type { LoggedUser } from "../models/LoggedUser";
 
 function Login() {
   useEffect(() => {
    
-      // handleLogin();     -- use in useEffect for auto-Login
+      // handleLogin();     -- use in useEffect for auto-Login??
   }, []);
 
   const navigate = useNavigate();
 
 
-  const [user, setUser] = useState("");
-  const [pass, setPass] = useState("");
-
-  const handleLogin = async () => {
-    // try {
-    //   // const data = await login({email: "admin@notecloud.local", password: "Admin123!" });
-    //   const data = await login({email: user, password: pass});
-
-    //   console.log(data);
-
-    // } catch (err) {
-    //     let d= err as ApiRequestError;
-    //     alert(d.message);
-    // }
-
-    let textResponse = "";
-
-    try{
-      const data = await login({email: user, password: pass});
-      if(data){
-        goToNotes();
-      }
-    } catch (err){
-      console.log(err);
-      goToNotes();
-    }
+  const { setUserLogged} = useUser();
     
-
-  };
-
   let goToNotes = () =>{
     navigate("/main");
   }
+
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+
+  const [error, setError] = useState<string | null> (null);
+
+  const handleLogin = async (email: string, password: string) => {
+    try{ 
+
+      setError(null)
+      const data = await login<LoggedUser>({email: email, password: password})  //login(user: userLogin)  |   destructure the User.ts interface
+      console.log(data);
+      
+
+      let userObj: LoggedUser={
+        email: email,
+        password: password,
+        token: data.token,
+        expiresAt: data.expiresAt,
+        permissions: data.permissions,
+      }
+
+      setUserLogged(userObj);
+
+      
+      goToNotes();
+
+    } catch(err){
+      let e = err as ApiRequestError;   //need to tell TypeScript to treat e as an ERROR, so message and status properties become available.
+      // e.message = "FAILED";
+      setError(e.message ?? "login failed");    //updates UI state with either backend message or fallback.
+      // alert(e.message);
+
+      console.log(e.message);
+    }
+  };
+
+  
 
   return (
     <div
@@ -93,7 +106,10 @@ function Login() {
         borderRadius: "5px",
         marginTop: "20px",
       }}
-      onClick={handleLogin}>Login</button>
+      onClick={() => handleLogin(user, pass)}
+      >Login</button>
+
+      <p className="login-error-message">{error? error : ""}</p>
     </div>
   );
 }

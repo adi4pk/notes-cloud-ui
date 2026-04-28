@@ -109,3 +109,108 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+
+.header-section{
+  display: flex;
+  justify-content: center;
+}
+
+.title-wrapper{
+  margin-left: 30%;
+}
+
+.side-buttons{
+  margin-left: auto;
+}
+.logout-btn{
+  margin-top: 30px;
+  margin-right: 30px;
+  width: 70px;
+  height: 35px;
+  font-weight: bold;
+}
+
+.table-container > tr > td{
+  border: 2px solid salmon;
+}
+
+.note-header{
+  border: 2px solid salmon;
+  display: flex;
+}
+
+.note-title{
+  /* text-align: start; */
+  min-width: 80%;
+}
+
+.favorite-star{
+  align-self: center;
+}
+
+.note-date{
+  min-width: 205px;
+}
+
+
+
+/* EDIT Page */
+#note-title{
+  border: 2px solid salmon;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.edit-note-title{
+  margin-bottom: 25;
+  color: "#2c3e50";
+  font-size: "1.8em";
+}
+
+.form-container{
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.form-group{
+  display: flex;
+  flex-direction: column;
+}
+
+#note-content {
+  border: "2px solid salmon";
+  border-radius: 5px;
+  width: 400px;
+  height: 120px;
+}
+
+
+/* ADD NOTE Page */
+
+.title-error-div{
+  display: flex;
+  color: salmon;
+}
+
+.content-error-div{
+  display: flex;
+  color: salmon;
+}
+
+.add-note-error{
+  margin-left: 15px;
+}
+
+.hide{
+  display: none;
+}
+
+
+/* ////// LOGIN PAGE ////// */
+
+.login-error-message{
+  margin-top: 15px;
+  color: salmon;
+}

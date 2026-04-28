@@ -1,74 +1,60 @@
+import { useState } from "react";
 import type { NoteItem } from "../models/NoteItem";
-
+import { Link, useNavigate } from "react-router-dom";
+import { removeNote } from "../services/notesService";
 
 type NoteProps={
     note: NoteItem;
+    // onEdit: (note:NoteItem) => void;
+    reload: () => void;   //must specify :() -- type: function
 }
 
 
-function Note({note}:NoteProps){
+function Note({note, reload}:NoteProps){
 
+  let navigate = useNavigate();
+
+  let goToEditNote = () => {
+    navigate("/editNote")
+  }
+
+  async function deleteNote(id: string){
+    let data = await removeNote(id);
+    reload();
+  }
+  
     return(
         <>
-            <div key={note.id} className="note-wrapper">
-        <input
-          type="checkbox"
-          id="delete-note-1"
-          className="action-toggle delete-toggle"
-        />
-        <input type="checkbox" id="favorite-1" className="favorite-toggle" />
-        <div className="note-card">
-          <div className="note-header">
+          
+            <tr key={note.id} className="note-wrapper">
+        
+        {/* <input type="checkbox" id="favorite-1" className="favorite-toggle" /> */}
+        
+          <td className="note-header">
             <h3 className="note-title">{note.title}</h3>
             <label htmlFor="favorite-1" className="favorite-star">
               ⭐
             </label>
-          </div>
-          <p className="note-date">📅 {note.date}</p>
+          </td>
+          <td className="note-date">📅 {note.date}</td>
 
-          <input
-            type="checkbox"
-            id="edit-note-1"
-            className="action-toggle edit-toggle"
-          />
-
-          <p className="note-content">{note.content}</p>
-
-          <div className="note-actions">
-            <label htmlFor="edit-note-1" className="action-btn edit-btn">
-              ✏️ Editează
-            </label>
-            <label
-              htmlFor="delete-note-1"
+          <td>{note.content}</td>
+          <td className="note-tag tag-work">{note.categoryId}</td>
+          <td><Link to={`/editNote/${note.id}`}>✏️</Link></td>
+            <td
+              // htmlFor="delete-note-1"
               className="action-btn delete-btn"
             //   onClick={() => removeNote(index)}
+            onClick={() => deleteNote(note.id)}
             >
               🗑️ Șterge
-            </label>
-          </div>
+            </td>
+          
 
-          <div className="edit-form">
-            <div className="form-group">
-              <label>Titlu</label>
-              <input type="text" defaultValue={note.title} />
-            </div>
-            <div className="form-group">
-              <label>Conținut</label>
-              <textarea value={note.content} />
-            </div>
-            <div className="form-buttons">
-              <label htmlFor="edit-note-1" className="btn btn-primary">
-                💾 Salvează
-              </label>
-              <label htmlFor="edit-note-1" className="btn btn-secondary">
-                ❌ Anulează
-              </label>
-            </div>
-          </div>
 
-          <span className="note-tag tag-work">{note.categoryId}</span>
-        </div>
-      </div>
+          
+        
+      </tr>
         
         </>
     )
